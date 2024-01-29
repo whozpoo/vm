@@ -79,7 +79,9 @@ string Parser::arg1()
     }
 }
 
-int Parser::arg2()
+string Parser::arg2()
 {
-    return 0;
+    // push or pop
+    if (currentCommand.size() == 3) return currentCommand[2];
+    else throw invalid_argument("Invalid size from arg2()");
 }

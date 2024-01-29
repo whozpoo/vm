@@ -23,7 +23,7 @@ public:
     void advance();
     CommandType commandType();
     std::string arg1();
-    int arg2();
+    std::string arg2();
 private:
     std::ifstream& input;
     std::vector<std::string> currentCommand;

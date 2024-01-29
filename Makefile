@@ -2,10 +2,10 @@ CXX := clang++
 
 TARGET := vm
 
-SRC := VMTranslator.cpp parser.cpp codeWriter.cpp
+SRC := VMTranslator.cpp parser.cpp codeWriter.cpp helpers.cpp
 
 $(TARGET): $(SRC)
-	$(CXX) -std=c++20 -stdlib=libc++ -Wall -Wextra -pedantic $(SRC) -o $(TARGET) 
+	$(CXX) -std=c++20 -Wall -Wextra -pedantic $(SRC) -o $(TARGET) 
 
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET) test.asm
