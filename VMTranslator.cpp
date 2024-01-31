@@ -28,9 +28,10 @@ void handleAllCommands(Parser& parser, CodeWriter& codeWriter) {
             case CommandType::C_POP:
                 codeWriter.writePushPop(commandType, parser.arg1(), parser.arg2());
                 break;
+            case CommandType::EMPTY:
+                break;
             default:
                 throw invalid_argument("Invalid command type from handleAllCommands()");
-
         }
     }
 }

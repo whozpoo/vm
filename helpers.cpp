@@ -147,7 +147,7 @@ void writeArithmeticEq(ofstream& output)
     // if a - b != 0, jump to FALSE
     writeArithmeticSub(output);
     output << "@FALSE" << endl;
-    output << "M;JNE";
+    output << "M;JNE" << endl;
     pushBool(output);
 }
 

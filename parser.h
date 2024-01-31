@@ -13,7 +13,7 @@ enum class CommandType {
     C_FUNCTION,
     C_RETURN,
     C_CALL,
-    TEST
+    EMPTY
 };
 
 class Parser {

@@ -24,6 +24,7 @@ void Parser::advance()
             getline(input, currentLine);
         }
         else {
+            currentCommand.clear();
             return;
         }
     }
@@ -59,6 +60,9 @@ CommandType Parser::commandType()
         else {
             throw invalid_argument("Invalid command from commandType() size 3");
         }
+    }
+    else if (currentCommand.size() == 0) {
+        return CommandType::EMPTY;
     }
     else {
         throw invalid_argument("Invalid size from commandType()");
