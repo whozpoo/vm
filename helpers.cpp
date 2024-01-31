@@ -6,12 +6,16 @@
 
 using namespace std;
 
+int i = 0;
+
 /**
  * @brief Push the value in {segment index} onto the stack.
  *  
  */
 void pushToStack(ofstream& output, const string& segment, const std::string& index)
 {
+    output << "// PUSH" << endl;
+
     // put the value of seg i into D register
     writeSegValToD(output, segment, index);
 
@@ -21,6 +25,8 @@ void pushToStack(ofstream& output, const string& segment, const std::string& ind
 
 void popToSeg(std::ofstream& output, const std::string& segment, const std::string& index)
 {
+    output << "// POP" << endl;
+
     // pop to D
     popToD(output);
 
@@ -90,6 +96,8 @@ void decrementSP(ofstream& output)
 
 void writeArithmeticAnd(std::ofstream& output)
 {
+    output << "// AND" << endl;
+
     popToD(output);
 
     output << "A=A-1" << endl;
@@ -98,6 +106,8 @@ void writeArithmeticAnd(std::ofstream& output)
 
 void writeArithmeticOr(std::ofstream& output)
 {
+    output << "// OR" << endl;
+
     popToD(output);
 
     output << "A=A-1" << endl;
@@ -106,8 +116,10 @@ void writeArithmeticOr(std::ofstream& output)
 
 void writeArithmeticNot(std::ofstream& output)
 {
+    output << "// NOT" << endl;
+
     output << "@SP" << endl;
-    output << "A=A-1" << endl;
+    output << "A=M-1" << endl;
     output << "M=!M" << endl;    
 }
 
@@ -120,6 +132,8 @@ void writeArithmeticNot(std::ofstream& output)
  */
 void writeArithmeticAdd(ofstream& output)
 {
+    output << "// ADD" << endl;
+
     popToD(output);
         
     // add D to the second top value of the stack
@@ -129,6 +143,8 @@ void writeArithmeticAdd(ofstream& output)
 
 void writeArithmeticSub(ofstream& output)
 {
+    output << "// SUB" << endl;
+
     popToD(output);
 
     output << "A=A-1" << endl;
@@ -137,36 +153,47 @@ void writeArithmeticSub(ofstream& output)
 
 void writeArithmeticNeg(ofstream& output)
 {
+    output << "// NEG" << endl;
+
     output << "@SP" << endl;
-    output << "A=A-1" << endl;
+    output << "A=M-1" << endl;
     output << "M=-M" << endl;
 }
 
-void writeArithmeticEq(ofstream& output)
+void writeArithmeticEq(ofstream& output, int& i)
 {
+    output << "// EQ" << endl;
+
     // if a - b != 0, jump to FALSE
     writeArithmeticSub(output);
-    output << "@FALSE" << endl;
-    output << "M;JNE" << endl;
-    pushBool(output);
+    output << "D=M" << endl;
+    output << "@FALSE" << i << endl;
+    output << "D;JNE" << endl;
+    pushBool(output, i);
 }
 
-void writeArithmeticGt(ofstream& output)
+void writeArithmeticGt(ofstream& output, int& i)
 {
+    output << "// GT" << endl;
+
     // if a - b <= 0, jump to FALSE
     writeArithmeticSub(output);
-    output << "@FALSE" << endl;
-    output << "M;JLE" << endl;
-    pushBool(output);
+    output << "D=M" << endl;
+    output << "@FALSE" << i << endl;
+    output << "D;JLE" << endl;
+    pushBool(output, i);
 }
 
-void writeArithmeticLt(ofstream& output)
+void writeArithmeticLt(ofstream& output, int& i)
 {
+    output << "// LT" << endl;
+
     // if a - b >= 0, jump to FALSE
     writeArithmeticSub(output);
-    output << "@FALSE" << endl;
-    output << "M;JGE" << endl;
-    pushBool(output);
+    output << "D=M" << endl;
+    output << "@FALSE" << i << endl;
+    output << "D;JGE" << endl;
+    pushBool(output, i);
 }
 
 /**
@@ -177,19 +204,20 @@ void writeArithmeticLt(ofstream& output)
  *
  *        Duplicate labels? 
  */
-void pushBool(ofstream& output)
+void pushBool(ofstream& output, int& i)
 {
     decrementSP(output);
-    pushToStack(output, "constant", "1");
-    output << "@END" << endl;
+    pushToStack(output, "constant", "-1");
+    output << "@END" << i << endl;
     output << "0;JMP" << endl;
 
     // else, jump to pushing 0
-    output << "(FALSE)" << endl;
+    output << "(FALSE" << i << ")" << endl;
     decrementSP(output);
     pushToStack(output, "constant", "0");
 
-    output << "(END)" << endl;
+    output << "(END" << i << ")" << endl;
+    ++i;
 }
 
 /**

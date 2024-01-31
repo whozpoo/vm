@@ -18,14 +18,14 @@ void decrementSP(std::ofstream& output);
 void writeArithmeticAdd(std::ofstream& output);
 void writeArithmeticSub(std::ofstream& output);
 void writeArithmeticNeg(std::ofstream& output);
-void writeArithmeticEq(std::ofstream& output);
-void writeArithmeticGt(std::ofstream& output);
-void writeArithmeticLt(std::ofstream& output);
+void writeArithmeticEq(std::ofstream& output, int& i);
+void writeArithmeticGt(std::ofstream& output, int& i);
+void writeArithmeticLt(std::ofstream& output, int& i);
 void writeArithmeticAnd(std::ofstream& output);
 void writeArithmeticOr(std::ofstream& output);
 void writeArithmeticNot(std::ofstream& output);
 
-void pushBool(std::ofstream& output);
+void pushBool(std::ofstream& output, int& i);
 
 void writeInfiniteLoop(std::ofstream& output);
 #endif

@@ -6,7 +6,7 @@
 using namespace std;
 
 CodeWriter::CodeWriter(ofstream& output)
-    : output{output}
+    : output{output}, counter{0}
 {
 }
 
@@ -15,9 +15,9 @@ void CodeWriter::writeArithmetic(const string& command)
     if (command == "add") writeArithmeticAdd(output);
     else if (command == "sub") writeArithmeticSub(output);
     else if (command == "neg") writeArithmeticNeg(output);
-    else if (command == "eq") writeArithmeticEq(output);
-    else if (command == "gt") writeArithmeticGt(output);
-    else if (command == "lt") writeArithmeticLt(output);
+    else if (command == "eq") writeArithmeticEq(output, counter);
+    else if (command == "gt") writeArithmeticGt(output, counter);
+    else if (command == "lt") writeArithmeticLt(output, counter);
     else if (command == "and") writeArithmeticAnd(output);
     else if (command == "or") writeArithmeticOr(output);
     else if (command == "not") writeArithmeticNot(output);

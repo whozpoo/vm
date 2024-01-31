@@ -12,6 +12,7 @@ public:
     void close();
 private:
     std::ofstream& output;
+    int counter;
 };
 
 #endif
