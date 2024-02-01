@@ -8,7 +8,7 @@ void pushToStack(std::ofstream& output, const std::string& segment, const std::s
 void popToSeg(std::ofstream& output, const std::string& segment, const std::string& index);
 
 void writeSegValToD(std::ofstream& output, const std::string& segment, const std::string& index);
-void writeDValToSeg(std::ofstream& output, const std::string& segment, const std::string& index);
+void writeSegAddrToR13(std::ofstream& output, const std::string& segment, const std::string& index);
 void pushDToStack(std::ofstream& output);
 void popToD(std::ofstream& output);
 

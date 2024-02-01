@@ -10,11 +10,11 @@ int i = 0;
 
 /**
  * @brief Push the value in {segment index} onto the stack.
- *  
+ * 
  */
 void pushToStack(ofstream& output, const string& segment, const std::string& index)
 {
-    output << "// PUSH" << endl;
+    output << "// PUSH " << segment << " " << index << endl;
 
     // put the value of seg i into D register
     writeSegValToD(output, segment, index);
@@ -25,13 +25,14 @@ void pushToStack(ofstream& output, const string& segment, const std::string& ind
 
 void popToSeg(std::ofstream& output, const std::string& segment, const std::string& index)
 {
-    output << "// POP" << endl;
+    output << "// POP " << segment << " " << index << endl;
 
-    // pop to D
+    writeSegAddrToR13(output, segment, index);
+
     popToD(output);
-
-    // save the value of D to seg i
-    writeDValToSeg(output, segment, index);
+    output << "@R13" << endl;
+    output << "A=M" << endl;
+    output << "M=D" << endl;
 }
 
 /**
@@ -42,21 +43,52 @@ void popToSeg(std::ofstream& output, const std::string& segment, const std::stri
  */
 void writeSegValToD(ofstream& output, const string& segment, const string& index)
 {
+    // the value for a constant is the constant itself
     if (segment == "constant") {
         output << "@" << index << endl;
         output << "D=A" << endl;
     }
+    // the value for a static is the address in its label
+    // the value for a temp is the address in 5 + index
+    // the value for a pointer is THIS or THAT
+    else if (segment == "static" || segment == "temp" || segment == "pointer") {
+        output << "@" << index << endl;
+        output << "D=M" << endl;        
+    }
     else {
         output << "@" << segment << endl;
-        output << "A=A+" << index << endl;
+        output << "D=M" << endl;
+        output << "@" << index << endl;
+        output << "A=A+D" << endl;
         output << "D=M" << endl;
     }
 }
 
-void writeDValToSeg(ofstream& output, const string& segment, const string& index)
+/**
+ * @brief 
+ * 
+ *        A pointes to R13
+ *        D points to the destination
+ *        M points to the destination
+ */
+void writeSegAddrToR13(ofstream& output, const string& segment, const string& index)
 {
-    output << "@" << segment << endl;
-    output << "A=A+" << index << endl;
+    // the address for an static is it's label
+    // the address for a temp is 5 + index
+    // the address for a pointer is either THIS or THAT
+    if (segment == "static" || segment == "temp" || segment == "pointer") {
+        output << "@" << index << endl;
+        output << "D=A" << endl;
+    }
+    // addresses for these segments are the baseAddress + index = RAM[segment] + index
+    else {
+        output << "@" << segment << endl;
+        output << "D=M" << endl;
+        output << "@" << index << endl;
+        output << "D=A+D" << endl;      // now A contains the destination address
+    }
+
+    output << "@R13" << endl;
     output << "M=D" << endl;
 }
 

@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Read input file line by line
-    Parser parser(input);
+    Parser parser(input, argv[1]);
     CodeWriter codeWriter(output);
     handleAllCommands(parser, codeWriter);
     codeWriter.close();

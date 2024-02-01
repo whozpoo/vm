@@ -1,12 +1,15 @@
 #include <iostream>
 #include <sstream>
+#include <regex>
 #include "parser.h"
 
 using namespace std;
 
-Parser::Parser(ifstream& input)
+Parser::Parser(ifstream& input, string inputName)
     : input{input}
 {
+    regex pattern{R"(\..*$)"};
+    filename = regex_replace(inputName, pattern, "");
 }
 
 bool Parser::hasMoreCommands()
@@ -30,10 +33,10 @@ void Parser::advance()
     }
     currentLine.pop_back();
 
-    istringstream iss(currentLine);
+    currentCommand.clear();
 
     // split the line into tokens by space
-    currentCommand.clear();
+    istringstream iss(currentLine);
     while (getline(iss, token, ' ')) {
         currentCommand.push_back(token);
     }
@@ -65,20 +68,38 @@ CommandType Parser::commandType()
         return CommandType::EMPTY;
     }
     else {
-        throw invalid_argument("Invalid size from commandType()");
+        throw invalid_argument("Invalid size from commandType(). Command: " + currentCommand[0]);
     }
 }
 
 string Parser::arg1()
 {
-    // C_ARITHMETIC
+    // C_ARITHMETIC or COMMENT
     if (currentCommand.size() == 1) {
         return currentCommand[0];
     }
     else if (currentCommand.size() == 3) {
-        return currentCommand[1];
-    }
-    else {
+        string segment = currentCommand[1];
+        if (segment == "local") {
+            return "LCL";
+        } else if (segment == "argument") {
+            return "ARG";
+        } else if (segment == "this") {
+            return "THIS";
+        } else if (segment == "that") {
+            return "THAT";
+        } else if (segment == "pointer") {
+            return "pointer";
+        } else if (segment == "temp") {
+            return "temp";
+        } else if (segment == "constant") {
+            return "constant";
+        } else if (segment == "static") {
+            return "static";
+        } else {
+            throw invalid_argument("Invalid segment in arg1(): " + segment);
+        }
+    } else {
         throw invalid_argument("Invalid command from arg1()");
     }
 }
@@ -86,6 +107,17 @@ string Parser::arg1()
 string Parser::arg2()
 {
     // push or pop
-    if (currentCommand.size() == 3) return currentCommand[2];
+    if (currentCommand.size() == 3) {
+        if (currentCommand[1] == "static") {
+            return filename + "." + currentCommand[2];
+        } else if (currentCommand[1] == "temp") {
+            return to_string(5 + stoi(currentCommand[2]));
+        } else if (currentCommand[1] == "pointer" && currentCommand[2] == "0") {
+            return "THIS";
+        } else if (currentCommand[1] == "pointer" && currentCommand[2] == "1") {
+            return "THAT";
+        }
+        return currentCommand[2];
+    }
     else throw invalid_argument("Invalid size from arg2()");
 }
