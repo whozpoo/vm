@@ -37,7 +37,8 @@ void Parser::advance()
 
     // split the line into tokens by space
     istringstream iss(currentLine);
-    while (getline(iss, token, ' ')) {
+    while (iss >> token) {
+        if (token == "//") break;
         currentCommand.push_back(token);
     }
 }
@@ -51,6 +52,29 @@ CommandType Parser::commandType()
         else {
             cout << "Invalid: " << currentCommand[0] << endl;
             throw invalid_argument("Invalid command from commandType() size 1");
+        }
+    }
+    else if (currentCommand.size() == 2) {
+        if (currentCommand[0] == "label") {
+            return CommandType::C_LABEL;
+        }
+        else if (currentCommand[0] == "goto") {
+            return CommandType::C_GOTO;
+        }
+        else if (currentCommand[0] == "if-goto") {
+            return CommandType::C_IF;
+        }
+        else if (currentCommand[0] == "function") {
+            return CommandType::C_FUNCTION;
+        }
+        else if (currentCommand[0] == "return") {
+            return CommandType::C_RETURN;
+        }
+        else if (currentCommand[0] == "call") {
+            return CommandType::C_CALL;
+        }
+        else {
+            throw invalid_argument("Invalid command from commandType() size 2");
         }
     }
     else if (currentCommand.size() == 3) {
@@ -68,6 +92,8 @@ CommandType Parser::commandType()
         return CommandType::EMPTY;
     }
     else {
+        cout << "size: " << currentCommand.size() << endl;
+        for (const auto& e : currentCommand) cout << e << endl;
         throw invalid_argument("Invalid size from commandType(). Command: " + currentCommand[0]);
     }
 }
@@ -77,6 +103,11 @@ string Parser::arg1()
     // C_ARITHMETIC or COMMENT
     if (currentCommand.size() == 1) {
         return currentCommand[0];
+    }
+    else if (currentCommand.size() == 2) {
+        if (currentCommand[0] == "label" || currentCommand[0] == "goto" || currentCommand[0] == "if-goto") {
+            return currentCommand[0];
+        }
     }
     else if (currentCommand.size() == 3) {
         string segment = currentCommand[1];

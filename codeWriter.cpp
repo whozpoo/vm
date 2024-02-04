@@ -33,6 +33,25 @@ void CodeWriter::writePushPop(CommandType commandType, const string& segment, co
     return;
 }
 
+// TODO: Multiple functions?
+void CodeWriter::writeLabel(const std::string& label)
+{
+    output << "(" << label << ")" << endl;
+}
+
+void CodeWriter::writeGoto(const std::string& label)
+{
+    output << "@" << label << endl;
+    output << "0;JMP" << endl;
+}
+
+void CodeWriter::writeIf(const std::string& label)
+{
+    popToD(output);
+    output << "@" << label << endl;
+    output << "D;JNE" << endl;
+}
+
 void CodeWriter::close()
 {
     writeInfiniteLoop(output);

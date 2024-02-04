@@ -28,6 +28,15 @@ void handleAllCommands(Parser& parser, CodeWriter& codeWriter) {
             case CommandType::C_POP:
                 codeWriter.writePushPop(commandType, parser.arg1(), parser.arg2());
                 break;
+            case CommandType::C_LABEL:
+                codeWriter.writeLabel(parser.arg1());
+                break;
+            case CommandType::C_GOTO:
+                codeWriter.writeGoto(parser.arg1());
+                break;
+            case CommandType::C_IF:
+                codeWriter.writeIf(parser.arg1());
+                break;
             case CommandType::EMPTY:
                 break;
             default:
