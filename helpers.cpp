@@ -266,6 +266,116 @@ void popToD(ofstream& output)
     output << "D=M" << endl;        // 
 }
 
+void pushReturnAddress(ofstream& output, const string& returnAddress)
+{
+    output << "@" << returnAddress << endl;
+    output << "D=A" << endl;
+    pushDToStack(output);
+}
+
+/**
+ * @brief 
+ *
+ *        The status of the registers are the same as pushDToStack();
+ * 
+ * @param output 
+ * @param functionName 
+ * @param i 
+ */
+void pushCallerFrame(ofstream& output, const string& returnAddress)
+{
+    pushReturnAddress(output, returnAddress);
+
+    // push to pointer to the local segment of the caller onto the stack
+    output << "@LCL" << endl;
+    output << "D=M" << endl;
+    pushDToStack(output);
+
+    output << "@ARG" << endl;
+    output << "D=M" << endl;
+    pushDToStack(output);
+
+    output << "@THIS" << endl;
+    output << "D=M" << endl;
+    pushDToStack(output);
+
+    output << "@THAT" << endl;
+    output << "D=M" << endl;
+    pushDToStack(output);    
+}
+
+/**
+ * @brief Reset ARG and LCL for the callee.
+ * 
+ */
+void setCalleePtrs(ofstream& output, int numArgs)
+{
+    output << "@SP" << endl;
+    output << "D=M" << endl;
+    output << "@" << numArgs << endl;
+    output << "D=D-A" << endl;
+    output << "@5" << endl;
+    output << "D=D-A" << endl;
+
+    output << "@ARG" << endl;
+    output << "A=D" << endl;
+}
+
+void setCallerSP(ofstream& output)
+{
+    output << "@ARG" << endl;
+    output << "D=M+1" << endl;
+    output << "@SP" << endl;
+    output << "M=D" << endl;
+}
+
+/**
+ * @brief Update the seg variable for the caller and adjusts R13 register accordingly; it shifts 
+ *        the R13 pointer to the previous position in the stack.
+ *
+ *        Assuming D holds the address of the caller's segment and 
+ *        R13 contains a pointer to the caller's current frame segment.
+ *
+ *        Upon completion,
+ *        A register and M register will contain the pointer to the caller's next frame segment.
+ *        D register will be updated to the address of the caller's next segment.
+ *        The order is THAT->THIS->ARG->LCL->returnAddress
+ */
+void setCallerSeg(ofstream& output, const string& seg)
+{
+    // repoint label like THAT
+    output << "@" << seg << endl;
+    output << "M=D" << endl;
+    // maintain the pointer
+    output << "@R13" << endl;
+    output << "AM=M-1" << endl;
+    output << "D=M" << endl;    
+}
+
+
+/**
+ * @brief Go back to the returnAddress after THAT, THIS, LCL, ARG of the caller are recovered.
+ * 
+ */
+void recoverCaller(ofstream& output)
+{
+    // save the pointer to caller's that segment in R13.
+    output << "@LCL" << endl;
+    output << "AD=M-1" << endl;
+    output << "@R13" << endl;
+    output << "AM=D" << endl;
+    output << "D=M" << endl;
+
+    setCallerSeg(output, "THAT");
+    setCallerSeg(output, "THIS");
+    setCallerSeg(output, "ARG");
+    setCallerSeg(output, "LCL");
+
+    // store returnAddress in A, and then go to returnAddress;
+    output << "A=M" << endl;
+    output << "0;JMP" << endl;
+}
+
 
 void writeInfiniteLoop(ofstream& output)
 {

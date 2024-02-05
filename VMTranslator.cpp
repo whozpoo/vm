@@ -37,6 +37,15 @@ void handleAllCommands(Parser& parser, CodeWriter& codeWriter) {
             case CommandType::C_IF:
                 codeWriter.writeIf(parser.arg1());
                 break;
+            case CommandType::C_CALL:
+                codeWriter.writeCall(parser.arg1(), stoi(parser.arg2()));
+                break;
+            case CommandType::C_FUNCTION:
+                codeWriter.writeFunction(parser.arg1(), stoi(parser.arg2()));
+                break;
+            case CommandType::C_RETURN:
+                codeWriter.writeReturn();
+                break;
             case CommandType::EMPTY:
                 break;
             default:
@@ -60,8 +69,8 @@ int main(int argc, char* argv[]) {
     }
 
     // Open input and output files
-    ifstream input(argv[1]);
-    ofstream output(argv[2]);
+    ifstream input{argv[1]};
+    ofstream output{argv[2]};
     if (!input.is_open()) {
         cout << "Error: Could not open input file" << endl;
         return 1;
@@ -72,8 +81,8 @@ int main(int argc, char* argv[]) {
     }
 
     // Read input file line by line
-    Parser parser(input, argv[1]);
-    CodeWriter codeWriter(output);
+    Parser parser{input, argv[1]};
+    CodeWriter codeWriter{output};
     handleAllCommands(parser, codeWriter);
     codeWriter.close();
 

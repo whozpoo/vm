@@ -34,22 +34,78 @@ void CodeWriter::writePushPop(CommandType commandType, const string& segment, co
 }
 
 // TODO: Multiple functions?
-void CodeWriter::writeLabel(const std::string& label)
+void CodeWriter::writeLabel(const string& label)
 {
+    output << "// LABEL" << endl;
+
     output << "(" << label << ")" << endl;
 }
 
-void CodeWriter::writeGoto(const std::string& label)
+void CodeWriter::writeGoto(const string& label)
 {
+    output << "// GOTO" << endl;
+
     output << "@" << label << endl;
     output << "0;JMP" << endl;
 }
 
-void CodeWriter::writeIf(const std::string& label)
+void CodeWriter::writeIf(const string& label)
 {
+    output << "// IF-GOTO" << endl;
+
     popToD(output);
     output << "@" << label << endl;
     output << "D;JNE" << endl;
+}
+
+void CodeWriter::writeCall(const string& functionName, int numArgs)
+{
+    output << "// CALL" << endl;
+
+    const string returnAddress = functionName + "$ret" + to_string(currentCall);
+
+    pushCallerFrame(output, returnAddress);
+
+    setCalleePtrs(output, numArgs);
+    
+    // goto the callee
+    writeGoto(functionName);
+
+    // inject the return address label to the code
+    output << "(" << returnAddress << ")" << endl;
+
+    // Maintain the index for return label
+    ++currentCall;
+
+}
+
+void CodeWriter::writeFunction(const string& functionName, int numLocals)
+{
+    output << "// FUNCTION" << endl;
+
+    output << "(" << functionName << ")" << endl;
+    for (int i = 0; i < numLocals; ++i) pushToStack(output, "constant", "0");
+}
+
+/**
+ * @brief Recover the environment of the caller function.
+ * 
+ * 
+ */
+void CodeWriter::writeReturn()
+{
+    output << "// RETURN" << endl;
+
+    // pop return value to arg0
+    popToSeg(output, "ARG", "0");
+    
+    // reset SP
+    setCallerSP(output);
+
+    recoverCaller(output);
+
+    // reset the index for return label
+    currentCall = 0;
 }
 
 void CodeWriter::close()

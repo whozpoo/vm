@@ -26,6 +26,12 @@ void writeArithmeticOr(std::ofstream& output);
 void writeArithmeticNot(std::ofstream& output);
 
 void pushBool(std::ofstream& output, int& i);
+void pushReturnAddress(std::ofstream& output, const std::string& returnAddress);
+void pushCallerFrame(std::ofstream& output, const std::string& functionName);
+void setCallerSeg(std::ofstream& output, const std::string& seg);
+void setCalleePtrs(std::ofstream& output, int numArgs);
+void setCallerSP(std::ofstream& output);
+void recoverCaller(std::ofstream& output);
 
 void writeInfiniteLoop(std::ofstream& output);
 #endif

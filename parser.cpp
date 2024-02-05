@@ -36,7 +36,7 @@ void Parser::advance()
     currentCommand.clear();
 
     // split the line into tokens by space
-    istringstream iss(currentLine);
+    istringstream iss{currentLine};
     while (iss >> token) {
         if (token == "//") break;
         currentCommand.push_back(token);
@@ -48,6 +48,9 @@ CommandType Parser::commandType()
     if (currentCommand.size() == 1) {
         if (currentCommand[0] == "add" || currentCommand[0] == "sub" || currentCommand[0] == "neg" || currentCommand[0] == "eq" || currentCommand[0] == "gt" || currentCommand[0] == "lt" || currentCommand[0] == "and" || currentCommand[0] == "or" || currentCommand[0] == "not") {
             return CommandType::C_ARITHMETIC;
+        }
+        else if (currentCommand[0] == "return") {
+            return CommandType::C_RETURN;
         }
         else {
             cout << "Invalid: " << currentCommand[0] << endl;
@@ -64,15 +67,6 @@ CommandType Parser::commandType()
         else if (currentCommand[0] == "if-goto") {
             return CommandType::C_IF;
         }
-        else if (currentCommand[0] == "function") {
-            return CommandType::C_FUNCTION;
-        }
-        else if (currentCommand[0] == "return") {
-            return CommandType::C_RETURN;
-        }
-        else if (currentCommand[0] == "call") {
-            return CommandType::C_CALL;
-        }
         else {
             throw invalid_argument("Invalid command from commandType() size 2");
         }
@@ -83,6 +77,12 @@ CommandType Parser::commandType()
         }
         else if (currentCommand[0] == "pop") {
             return CommandType::C_POP;
+        }
+        else if (currentCommand[0] == "call") {
+            return CommandType::C_CALL;
+        }
+        else if (currentCommand[0] == "function") {
+            return CommandType::C_FUNCTION;
         }
         else {
             throw invalid_argument("Invalid command from commandType() size 3");
@@ -106,28 +106,40 @@ string Parser::arg1()
     }
     else if (currentCommand.size() == 2) {
         if (currentCommand[0] == "label" || currentCommand[0] == "goto" || currentCommand[0] == "if-goto") {
-            return currentCommand[0];
+            return currentCommand[1];
         }
     }
     else if (currentCommand.size() == 3) {
+        if (currentCommand[0] == "call" || currentCommand[0] == "function"){
+            return currentCommand[1];
+        }
+
         string segment = currentCommand[1];
         if (segment == "local") {
             return "LCL";
-        } else if (segment == "argument") {
+        } 
+        else if (segment == "argument") {
             return "ARG";
-        } else if (segment == "this") {
+        } 
+        else if (segment == "this") {
             return "THIS";
-        } else if (segment == "that") {
+        } 
+        else if (segment == "that") {
             return "THAT";
-        } else if (segment == "pointer") {
+        } 
+        else if (segment == "pointer") {
             return "pointer";
-        } else if (segment == "temp") {
+        } 
+        else if (segment == "temp") {
             return "temp";
-        } else if (segment == "constant") {
+        } 
+        else if (segment == "constant") {
             return "constant";
-        } else if (segment == "static") {
+        } 
+        else if (segment == "static") {
             return "static";
-        } else {
+        } 
+        else {
             throw invalid_argument("Invalid segment in arg1(): " + segment);
         }
     } else {
