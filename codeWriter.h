@@ -21,7 +21,7 @@ private:
     std::ofstream& output;
     int counter;
     int currentCall;
-    //std::string& filename;
+    std::string currentFunction;  // swap to the function when writing it, and revert to empty once the return is reached. 
 };
 
 #endif

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include "parser.h"
 #include "codeWriter.h"
 
@@ -54,6 +55,43 @@ void handleAllCommands(Parser& parser, CodeWriter& codeWriter) {
     }
 }
 
+/**
+ * @brief Compile a single vm file into the asm file.
+ * 
+ */
+void compileFile(const string& path, CodeWriter& codeWriter)
+{
+    // Open input and output files
+    ifstream input{path};
+    if (!input.is_open()) {
+        cout << "Error: Could not open input file" << endl;
+        throw invalid_argument("Could not open input file");
+    
+    }
+
+    Parser parser{input, path};
+    handleAllCommands(parser, codeWriter);
+}
+
+/**
+ * @brief Construct a new asm file out of vm files.
+ * 
+ * @param path - A folder that contains vm files or a single vm file.
+ * @param output - The asm file.
+ */
+void compileFiles(const string& path, CodeWriter& codeWriter)
+{
+    if (filesystem::is_directory(path)) {
+        // for all vm files
+        for (const auto& entry : filesystem::directory_iterator(path)) {
+            if (entry.is_regular_file() && entry.path().extension() == ".vm") compileFile(entry.path(), codeWriter);
+        }
+    }
+    else {
+        compileFile(path, codeWriter);
+    }
+}
+
 
 /**
  * @brief Convert VM code to Assembly code.
@@ -68,23 +106,15 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Open input and output files
-    ifstream input{argv[1]};
     ofstream output{argv[2]};
-    if (!input.is_open()) {
-        cout << "Error: Could not open input file" << endl;
-        return 1;
-    }
     if (!output.is_open()) {
         cout << "Error: Could not open output file" << endl;
         return 1;
     }
-
-    // Read input file line by line
-    Parser parser{input, argv[1]};
     CodeWriter codeWriter{output};
-    handleAllCommands(parser, codeWriter);
-    codeWriter.close();
 
+    compileFiles(argv[1], codeWriter);
+
+    codeWriter.close();
     return 0;
 }

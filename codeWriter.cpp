@@ -6,7 +6,7 @@
 using namespace std;
 
 CodeWriter::CodeWriter(ofstream& output)
-    : output{output}, counter{0}
+    : output{output}, counter{0}, currentCall{0}, currentFunction{""}
 {
 }
 
@@ -38,14 +38,14 @@ void CodeWriter::writeLabel(const string& label)
 {
     output << "// LABEL" << endl;
 
-    output << "(" << label << ")" << endl;
+    output << "(" << currentFunction << "$" << label << ")" << endl;
 }
 
 void CodeWriter::writeGoto(const string& label)
 {
     output << "// GOTO" << endl;
 
-    output << "@" << label << endl;
+    output << "@" << currentFunction << "$" << label << endl;
     output << "0;JMP" << endl;
 }
 
@@ -54,7 +54,7 @@ void CodeWriter::writeIf(const string& label)
     output << "// IF-GOTO" << endl;
 
     popToD(output);
-    output << "@" << label << endl;
+    output << "@" << currentFunction << "$" << label << endl;
     output << "D;JNE" << endl;
 }
 
@@ -84,6 +84,7 @@ void CodeWriter::writeFunction(const string& functionName, int numLocals)
     output << "// FUNCTION" << endl;
 
     output << "(" << functionName << ")" << endl;
+    currentFunction = functionName;
     for (int i = 0; i < numLocals; ++i) pushToStack(output, "constant", "0");
 }
 
@@ -95,6 +96,7 @@ void CodeWriter::writeFunction(const string& functionName, int numLocals)
 void CodeWriter::writeReturn()
 {
     output << "// RETURN" << endl;
+    currentFunction = "";
 
     // pop return value to arg0
     popToSeg(output, "ARG", "0");
