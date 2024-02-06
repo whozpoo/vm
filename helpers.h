@@ -3,6 +3,7 @@
 
 #include <fstream>
 
+void bootSP(std::ofstream& output);
 
 void pushToStack(std::ofstream& output, const std::string& segment, const std::string& index);
 void popToSeg(std::ofstream& output, const std::string& segment, const std::string& index);

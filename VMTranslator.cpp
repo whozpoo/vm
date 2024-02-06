@@ -69,7 +69,8 @@ void compileFile(const string& path, CodeWriter& codeWriter)
     
     }
 
-    Parser parser{input, path};
+    filesystem::path fsPath{path};
+    Parser parser{input, fsPath.filename().string()};
     handleAllCommands(parser, codeWriter);
 }
 
@@ -84,7 +85,8 @@ void compileFiles(const string& path, CodeWriter& codeWriter)
     if (filesystem::is_directory(path)) {
         // for all vm files
         for (const auto& entry : filesystem::directory_iterator(path)) {
-            if (entry.is_regular_file() && entry.path().extension() == ".vm") compileFile(entry.path(), codeWriter);
+            if (entry.path().filename().string().starts_with(".")) continue; 
+            if (entry.path().extension() == ".vm") compileFile(entry.path(), codeWriter);
         }
     }
     else {

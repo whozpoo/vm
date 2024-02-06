@@ -111,6 +111,7 @@ string Parser::arg1()
     }
     else if (currentCommand.size() == 3) {
         if (currentCommand[0] == "call" || currentCommand[0] == "function"){
+
             return currentCommand[1];
         }
 

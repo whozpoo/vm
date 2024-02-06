@@ -6,7 +6,14 @@
 
 using namespace std;
 
-int i = 0;
+void bootSP(ofstream& output)
+{
+    // set SP to 256
+    output << "@261" << endl;
+    output << "D=A" << endl;
+    output << "@SP" << endl;
+    output << "M=D" << endl;
+}
 
 /**
  * @brief Push the value in {segment index} onto the stack.
@@ -239,7 +246,8 @@ void writeArithmeticLt(ofstream& output, int& i)
 void pushBool(ofstream& output, int& i)
 {
     decrementSP(output);
-    pushToStack(output, "constant", "-1");
+    output << "D=-1" << endl;
+    pushDToStack(output);
     output << "@END" << i << endl;
     output << "0;JMP" << endl;
 
@@ -312,13 +320,18 @@ void setCalleePtrs(ofstream& output, int numArgs)
 {
     output << "@SP" << endl;
     output << "D=M" << endl;
+
+    // LCL = SP
+    output << "@LCL" << endl;
+    output << "M=D" << endl;
+
+    // ARG = SP - numArgs - 5
     output << "@" << numArgs << endl;
     output << "D=D-A" << endl;
     output << "@5" << endl;
     output << "D=D-A" << endl;
-
     output << "@ARG" << endl;
-    output << "A=D" << endl;
+    output << "M=D" << endl;
 }
 
 void setCallerSP(ofstream& output)
@@ -359,6 +372,20 @@ void setCallerSeg(ofstream& output, const string& seg)
  */
 void recoverCaller(ofstream& output)
 {
+    // save returnAddress in R14
+    output << "@5" << endl;
+    output << "D=A" << endl;
+    output << "@LCL" << endl;
+    output << "A=M-D" << endl;
+    output << "D=M" << endl;
+    output << "@R14" << endl;
+    output << "M=D" << endl;
+
+    // pop return value to arg0
+    popToSeg(output, "ARG", "0");
+
+    setCallerSP(output);
+
     // save the pointer to caller's that segment in R13.
     output << "@LCL" << endl;
     output << "AD=M-1" << endl;
@@ -372,6 +399,7 @@ void recoverCaller(ofstream& output)
     setCallerSeg(output, "LCL");
 
     // store returnAddress in A, and then go to returnAddress;
+    output << "@R14" << endl;
     output << "A=M" << endl;
     output << "0;JMP" << endl;
 }

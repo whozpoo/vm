@@ -8,6 +8,9 @@ using namespace std;
 CodeWriter::CodeWriter(ofstream& output)
     : output{output}, counter{0}, currentCall{0}, currentFunction{""}
 {
+    bootSP(output);
+    output << "@Sys.init" << endl;
+    output << "0;JMP" << endl;
 }
 
 void CodeWriter::writeArithmetic(const string& command)
@@ -62,20 +65,18 @@ void CodeWriter::writeCall(const string& functionName, int numArgs)
 {
     output << "// CALL" << endl;
 
-    const string returnAddress = functionName + "$ret" + to_string(currentCall);
+    const string returnAddress = functionName + "$ret" + to_string(currentCall++);
 
     pushCallerFrame(output, returnAddress);
 
     setCalleePtrs(output, numArgs);
     
     // goto the callee
-    writeGoto(functionName);
+    output << "@" << functionName << endl;
+    output << "0;JMP" << endl;
 
     // inject the return address label to the code
     output << "(" << returnAddress << ")" << endl;
-
-    // Maintain the index for return label
-    ++currentCall;
 
 }
 
@@ -96,18 +97,9 @@ void CodeWriter::writeFunction(const string& functionName, int numLocals)
 void CodeWriter::writeReturn()
 {
     output << "// RETURN" << endl;
-    currentFunction = "";
-
-    // pop return value to arg0
-    popToSeg(output, "ARG", "0");
-    
-    // reset SP
-    setCallerSP(output);
 
     recoverCaller(output);
 
-    // reset the index for return label
-    currentCall = 0;
 }
 
 void CodeWriter::close()
